@@ -1,0 +1,21 @@
+<!doctype html><html><head><meta charset="utf-8"><title>net test</title>
+<style>html,body{margin:0;height:100%;background:#0b1020;overflow:hidden}#view{position:fixed;inset:0;display:grid;place-items:center}#stage{position:relative}</style></head>
+<body><div id="view"><div id="stage"></div></div><div id="cap" hidden></div>
+<input id="bar" type="range" hidden><span id="time" hidden></span><button id="play" hidden></button><button id="back" hidden></button><button id="fwd" hidden></button>
+<script type="module">
+import { startLesson } from './engine.js';
+const D = { kicker: '17.1.4 · FORWARD PROPAGATION', short: 'Follow a tile to its score', title: 'Forward propagation',
+  timing: [[0, 1], [1, 2], [2, 3], [3, 4]], sentences: ['a', 'b', 'c', 'd'], T: 4 };
+const lessonFn = async (L) => {
+  const { M, net, play, until, S } = L;
+  const N = net({ layers: [2, 2, 1], center: [0, -0.6, 0], names: ['blue corner', 'orange corner'], outName: 'match score' });
+  await until(S(0)); await play(new M.FadeIn(N.group));
+  await play(...N.value(0, 0, '1'), ...N.value(0, 1, '0'));
+  await play(...N.weight(0, 0, 0, 1), ...N.weight(0, 1, 0, -1), ...N.weight(0, 0, 1, -1), ...N.weight(0, 1, 1, 1));
+  await play(...N.value(1, 0, '1'), ...N.value(1, 1, '0'), ...N.value(2, 0, '0', '#fbbf24'));
+};
+const $ = x => document.getElementById(x);
+const ctl = await startLesson({ D, lessonFn, mount: $('stage'), audioUrl: '../audio/1.1.1.mp3',
+  els: { cap: $('cap'), bar: $('bar'), time: $('time'), play: $('play'), back: $('back'), fwd: $('fwd') } });
+await ctl.seek(3.9); await new Promise(r => setTimeout(r, 2500)); ctl.sc.render(); window.__ready = true;
+</script></body></html>

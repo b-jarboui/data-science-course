@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+<script>
+/* Anonymous usage statistics (Microsoft Clarity). Skipped for QA (?qa=1) and local development. */
+(function(c,l,a,r,i,t,y){
+  if(/[?&]qa=1/.test(location.search)||/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)||location.protocol==="file:")return;
+  c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+  t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+  y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+})(window,document,"clarity","script","zkb6a2xrzl");
+</script>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data Science · Lesson</title>
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #0b1020;
+  --ink: #eef2ff;
+  --muted: #b2bdd9;
+  --cyan: #5ad7e8;
+  --line: #344264;
+  --panel: #10172d;
+  --amber: #fbbf24;
+  --mono: Consolas, "Courier New", monospace;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 1rem/1.45 "Segoe UI", Inter, Arial, sans-serif; }
+#wrap {
+  height: 100vh; height: 100dvh;
+  min-height: 19rem;
+  display: grid; grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+}
+#top, .transport {
+  width: min(100%, 64rem); margin-inline: auto;
+  padding-inline: clamp(.875rem, 3vw, 2rem);
+}
+#top {
+  grid-area: 1 / 1; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 .75rem;
+  padding-top: env(safe-area-inset-top);
+  border-bottom: 1px solid var(--line);
+}
+#top a { display: inline-flex; align-items: center; min-height: 44px; color: var(--cyan); text-decoration: none; font-weight: 650; }
+#top a:hover { text-decoration: underline; }
+#count, #time, #simt { color: var(--muted); font: 600 .875rem/1.4 var(--mono); }
+#view {
+  grid-area: 2 / 1; position: relative; min-height: 0; min-width: 0;
+  display: grid; grid-template: minmax(0, 1fr) / minmax(0, 1fr); place-items: center;
+}
+#stage { position: relative; min-width: 0; min-height: 0; max-width: 100%; max-height: 100%; }
+#stage canvas { display: block; }
+#wrap:has(#start) #stage { visibility: hidden; }
+#start {
+  grid-area: 2 / 1 / 4; z-index: 1; min-width: 0; min-height: 0;
+  display: grid; align-content: safe center; justify-items: center;
+  gap: clamp(.75rem, 2vh, 1.25rem); padding: 1rem; text-align: center; overflow: auto;
+  background: radial-gradient(ellipse at center, #142337 0%, var(--bg) 66%);
+}
+#kicker {
+  color: var(--cyan); font: 650 .875rem/1.45 var(--mono); letter-spacing: .05em;
+  max-width: 100%; overflow-wrap: anywhere;
+}
+#start h1 {
+  width: min(100%, 21ch); margin: 0; overflow-wrap: anywhere; color: var(--ink); font-size: clamp(2rem, 4.2vw, 3.25rem);
+  line-height: 1.12; letter-spacing: -.025em; text-wrap: balance;
+}
+button {
+  font: inherit; font-weight: 650; min-width: 44px; min-height: 44px; padding: .45rem .8rem;
+  border: 1px solid #536485; border-radius: .65rem; color: var(--ink); background: #18213a; cursor: pointer;
+}
+button:hover:enabled { border-color: var(--cyan); background: #21314b; }
+#startButton, #play { background: var(--cyan); color: #082029; border-color: var(--cyan); }
+#wrap:has(#start) #play { background: #18213a; color: var(--ink); border-color: #536485; }
+#startButton:hover:enabled, #play:hover:enabled { background: #89e8f3; }
+#startButton { margin-top: .35rem; border-radius: 2rem; padding: .65rem 1.35rem; }
+button:disabled, #startButton:disabled, #wrap:has(#start) #play:disabled { color: #93a0b9; border-color: #4a5771; background: #141c2c; cursor: default; }
+:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
+footer { grid-area: 4 / 1; background: var(--panel); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom); }
+#cap {
+  max-width: 68ch; margin: 0 auto; text-align: center; text-wrap: pretty;
+  font-size: clamp(1rem, 1.6vw, 1.2rem); line-height: 1.4;
+}
+#cap:not(:empty) { padding: .5rem .85rem; }
+#captionRow { grid-area: 3 / 1; min-width: 0; height: 4.5rem; align-content: safe center; overflow-y: auto; }
+#wrap:has(#start) #captionRow { visibility: hidden; }
+#count, #time { font-size: .9375rem; }
+#count { margin-inline-start: auto; text-align: end; overflow-wrap: anywhere; }
+#seek { min-width: 0; display: flex; align-items: center; gap: .85rem; }
+#bar { flex: 1; min-width: 0; width: 100%; height: 44px; margin: 0; accent-color: var(--cyan); cursor: pointer; }
+#time { white-space: nowrap; font-variant-numeric: tabular-nums; }
+#ctl { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; justify-content: center; padding: 0 0 .75rem; }
+#ctl button { white-space: nowrap; }
+#prev, #next { font-size: 1.35rem; line-height: 1; }
+#back, #fwd { font-variant-numeric: tabular-nums; }
+#play { min-width: 4rem; }
+#try { color: var(--amber); border-color: var(--amber); }
+#nnb { color: #6ee7f9; border-color: #6ee7f9; }
+#simp {
+  position: fixed; inset: 0; z-index: 5; background: var(--bg); overflow-y: auto; display: none;
+  padding: max(.75rem, env(safe-area-inset-top)) clamp(.75rem, 3vw, 1.75rem) max(2rem, env(safe-area-inset-bottom));
+}
+#simp .top { max-width: 980px; margin: 0 auto 1rem; padding-bottom: .5rem; border-bottom: 1px solid var(--line); display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+#simt { color: var(--amber); }
+@media (min-width: 56rem) {
+  .transport { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 1.5rem; padding-block: .65rem; }
+  #ctl { padding: 0; }
+  #prev { margin-inline-end: .35rem; }
+  #next { margin-inline-start: .35rem; }
+}
+@media (max-width: 38rem) {
+  #count { font-size: .875rem; }
+  #captionRow { height: 6rem; }
+  #ctl { gap: .375rem; }
+  #seek { gap: .625rem; }
+  #ctl button { padding-inline: .45rem; }
+  #play { min-width: 3rem; }
+}
+@media (max-width: 23rem) {
+  #ctl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-height: 30rem) and (orientation: landscape) {
+  #captionRow { height: 2.7rem; }
+  #cap:not(:empty) { padding-block: 0; }
+  .transport { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; padding-block: .3rem; }
+  #seek { flex: 1 1 9rem; }
+  #ctl { padding: 0; }
+}
+</style>
+</head>
+<body>
+<div id="wrap">
+ <div id="top"><a href="./index.html">‹ All lessons</a><span id="count"></span></div>
+ <div id="view"><div id="stage"></div></div>
+ <div id="start">
+   <span id="kicker"></span>
+   <h1 id="question"></h1>
+   <button id="startButton" disabled>Loading lesson…</button>
+ </div>
+ <div id="captionRow"><div id="cap" aria-live="polite"></div></div>
+ <footer><div class="transport">
+ <div id="seek"><input id="bar" type="range" min="0" max="100" step="0.1" value="0" aria-label="Lesson position"><span id="time">0:00</span></div>
+ <div id="ctl"><button id="prev" aria-label="Previous lesson" title="Previous lesson">‹</button><button id="back" aria-label="Back 10 seconds">−10 s</button><button id="play" aria-label="Play or pause">▶</button><button id="fwd" aria-label="Forward 10 seconds">+10 s</button><button id="try" hidden>Try it</button><button id="nnb" hidden title="Neural network playground">Network</button><button id="next" aria-label="Next lesson" title="Next lesson">›</button></div>
+ </div></footer>
+</div>
+<div id="simp" role="dialog" aria-modal="true" aria-labelledby="simt"><div class="top"><b id="simt">TRY IT</b><button id="simx">Close ✕</button></div><div id="simroot"></div></div>
+<script type="module">
+import DATA from './data.js';
+const $ = x => document.getElementById(x);
+const ids = Object.keys(DATA);
+const params = new URLSearchParams(location.search);
+const requestedId = params.get('s') || params.get('id');
+const id = ids.includes(requestedId) ? requestedId : ids[0];
+const D = DATA[id];
+$('kicker').textContent = D.kicker;
+$('question').textContent = D.short || D.title;
+document.title = `${D.title} · Data Science`;
+$('count').textContent = `LESSON ${id} · ${ids.indexOf(id) + 1}/${ids.length}`;
+const go = d => { const n = ids[ids.indexOf(id) + d]; if (n) location.search = `?s=${n}`; };
+$('prev').onclick = () => go(-1); $('next').onclick = () => go(1);
+$('prev').disabled = ids.indexOf(id) === 0; $('next').disabled = ids.indexOf(id) === ids.length - 1;
+
+let ctl;
+
+// "Try it" simulation panel
+let cleanup = null;
+async function openSim() {
+  ctl?.pause();
+  const kit = await import('./sim/kit.js');
+  if (!document.getElementById('simcss')) { const st = document.createElement('style'); st.id = 'simcss'; st.textContent = kit.CSS; document.head.append(st); }
+  const mod = await import(`./sim/${id}.js`);
+  $('simroot').replaceChildren(); $('simt').textContent = `TRY IT · LESSON ${id}`;
+  $('simp').style.display = 'block';
+  cleanup = mod.default($('simroot'), kit);
+  $('wrap').inert = true;
+  $('simx').focus();
+}
+$('simx').onclick = () => {
+  if (cleanup) cleanup();
+  cleanup = null;
+  $('simp').style.display = 'none';
+  $('wrap').inert = false;
+  $('try').focus();
+};
+$('simp').onkeydown = event => { if (event.key === 'Escape') $('simx').click(); };
+// Neural network playground (chapters 17-21): a real small network that learns, step by step
+async function openNet() {
+  ctl?.pause();
+  const { nnPlayground } = await import('./sim/nnsim.js');
+  $('simroot').replaceChildren(); $('simt').textContent = 'NEURAL NETWORK PLAYGROUND';
+  $('simp').style.display = 'block';
+  const pg = nnPlayground($('simroot'), {});
+  cleanup = () => pg && pg.destroy && pg.destroy();
+  $('wrap').inert = true;
+  $('simx').focus();
+}
+if (+id.split('.')[0] >= 17) { $('nnb').hidden = false; $('nnb').onclick = openNet; if (location.hash === '#net') openNet(); }
+if (D.sim) { $('try').hidden = false; $('try').onclick = openSim; if (location.hash === '#try') openSim(); }
+const playbackControls = ['play', 'bar', 'back', 'fwd'];
+playbackControls.forEach(key => { $(key).disabled = true; });
+try {
+  const { startLesson } = await import('./live/engine.js');
+  const lessonFn = (await import(`./live/${id}.js`)).default;
+  ctl = await startLesson({ D, lessonFn, mount: $('stage'), audioUrl: `audio/${id}.mp3`,
+    els: { cap: $('cap'), bar: $('bar'), time: $('time'), play: $('play'), back: $('back'), fwd: $('fwd') } });
+  $('startButton').disabled = false;
+  $('startButton').textContent = '▶  Play lesson';
+  $('startButton').onclick = () => { $('play').click(); $('play').focus(); };
+  const dismissStart = () => $('start')?.remove();
+  $('play').addEventListener('click', dismissStart);
+  $('bar').addEventListener('change', dismissStart);
+  $('fwd').addEventListener('click', dismissStart);
+  playbackControls.forEach(key => { $(key).disabled = false; });
+  window.__lesson = ctl;
+} catch (error) {
+  $('startButton').textContent = 'Lesson unavailable · Retry';
+  $('startButton').disabled = false;
+  $('startButton').onclick = () => location.reload();
+  console.error(error);
+}
+</script>
+</body>
+</html>

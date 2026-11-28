@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<script>
+/* Anonymous usage statistics (Microsoft Clarity). Skipped for QA (?qa=1) and local development. */
+(function(c,l,a,r,i,t,y){
+  if(/[?&]qa=1/.test(location.search)||/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)||location.protocol==="file:")return;
+  c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+  t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+  y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+})(window,document,"clarity","script","zkb6a2xrzl");
+</script>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Algorithms in action · Data Science lab</title>
+<link rel="stylesheet" href="lab.css">
+</head>
+<body>
+<main>
+<header class="lab-head">
+  <div class="lab-kick">DATA SCIENCE · THE LAB</div>
+  <nav class="lab-nav"><a href="../index.html">‹ Course map</a></nav>
+  <h1>Algorithms in action</h1>
+  <p>In the lessons you saw each method on a few points. Here the same methods work on hundreds of points that look like real cases: customers, loans, house prices, images. Press Play, watch each method work step by step, and compare them on the same data. Everything is computed live in your browser.</p>
+</header>
+<div class="lab-cards">
+  <a class="lab-tile" href="clustering.html">
+    <svg viewBox="0 0 320 130" aria-hidden="true"><g fill="#5ad7e8"><circle cx="60" cy="40" r="4"/><circle cx="72" cy="52" r="4"/><circle cx="50" cy="55" r="4"/><circle cx="66" cy="30" r="4"/><circle cx="80" cy="42" r="4"/></g><g fill="#f472b6"><circle cx="150" cy="90" r="4"/><circle cx="165" cy="98" r="4"/><circle cx="158" cy="80" r="4"/><circle cx="172" cy="86" r="4"/><circle cx="145" cy="102" r="4"/></g><g fill="#fbbf24"><circle cx="250" cy="40" r="4"/><circle cx="262" cy="50" r="4"/><circle cx="240" cy="52" r="4"/><circle cx="255" cy="30" r="4"/><circle cx="270" cy="38" r="4"/></g><g stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M60 38l10 10m0-10l-10 10M154 86l10 10m0-10l-10 10M250 36l10 10m0-10l-10 10"/></g></svg>
+    <span class="n">LAB 1</span><h2>Clustering: find the groups</h2>
+    <p>Six methods group the same 100 to 600 points with no labels: customers, salaries, shops on a map, machine readings.</p>
+    <span class="tags">k-means · k-means++ · Gaussian mixture (EM) · DBSCAN · hierarchical</span><span class="open">▸ Open the lab</span>
+  </a>
+  <a class="lab-tile" href="classify.html">
+    <svg viewBox="0 0 320 130" aria-hidden="true"><path d="M0 0H320V130H0z" fill="#12343f"/><path d="M0 130C80 120 120 20 200 60S300 10 320 0V130z" fill="#4a2244"/><g fill="#5ad7e8"><circle cx="40" cy="30" r="4"/><circle cx="90" cy="45" r="4"/><circle cx="140" cy="25" r="4"/><circle cx="210" cy="30" r="4"/><circle cx="60" cy="70" r="4"/></g><g fill="#f472b6"><circle cx="120" cy="100" r="4"/><circle cx="180" cy="95" r="4"/><circle cx="240" cy="80" r="4"/><circle cx="280" cy="50" r="4"/><circle cx="220" cy="110" r="4"/></g></svg>
+    <span class="n">LAB 2</span><h2>Classification: where is the border?</h2>
+    <p>Seven models learn spam, loans, blood tests and card fraud. See the answer of each model everywhere, on training and on test points.</p>
+    <span class="tags">logistic regression · k-NN · naive Bayes · tree · forest · SVM · neural network</span><span class="open">▸ Open the lab</span>
+  </a>
+  <a class="lab-tile" href="regression.html">
+    <svg viewBox="0 0 320 130" aria-hidden="true"><path d="M10 105C80 100 150 60 310 25" fill="none" stroke="#9aa6c9" stroke-width="2" stroke-dasharray="6 5"/><path d="M10 100C40 120 55 60 80 85S120 40 150 70 190 30 220 55 270 5 310 30" fill="none" stroke="#fff" stroke-width="3"/><g fill="#5ad7e8"><circle cx="30" cy="108" r="4"/><circle cx="68" cy="78" r="4"/><circle cx="110" cy="62" r="4"/><circle cx="150" cy="72" r="4"/><circle cx="200" cy="42" r="4"/><circle cx="250" cy="30" r="4"/><circle cx="295" cy="22" r="4"/></g><g fill="none" stroke="#fbbf24" stroke-width="2.5"><circle cx="90" cy="92" r="4"/><circle cx="175" cy="66" r="4"/><circle cx="270" cy="44" r="4"/></g></svg>
+    <span class="n">LAB 3</span><h2>Regression: too simple, right, too complex</h2>
+    <p>Four models predict house prices, energy use, salaries. Raise the complexity level by level and watch the test error.</p>
+    <span class="tags">polynomial · k-NN · regression tree · neural network · overfitting</span><span class="open">▸ Open the lab</span>
+  </a>
+  <a class="lab-tile" href="optimizers.html">
+    <svg viewBox="0 0 320 130" aria-hidden="true"><g fill="none" stroke="#3b3f8f" stroke-width="2"><ellipse cx="200" cy="70" rx="150" ry="58"/><ellipse cx="200" cy="70" rx="110" ry="42"/><ellipse cx="200" cy="70" rx="70" ry="27"/><ellipse cx="200" cy="70" rx="32" ry="12"/></g><path d="M40 30L60 100 85 45 110 92 135 55 160 82 185 65 200 70" fill="none" stroke="#5ad7e8" stroke-width="2.5"/><path d="M40 30C70 80 120 90 200 70" fill="none" stroke="#86efac" stroke-width="2.5"/><circle cx="40" cy="30" r="6" fill="none" stroke="#fff" stroke-width="2.5"/><path d="M194 64l12 12m0-12l-12 12" stroke="#86efac" stroke-width="3" stroke-linecap="round"/></svg>
+    <span class="n">LAB 4</span><h2>Optimizers: the race downhill</h2>
+    <p>Four optimizers walk down the same loss surface from the same start. Includes a real loss: fitting a line to house prices.</p>
+    <span class="tags">gradient descent · momentum · RMSProp · Adam · learning rate</span><span class="open">▸ Open the lab</span>
+  </a>
+  <a class="lab-tile" href="network.html">
+    <svg viewBox="0 0 320 130" aria-hidden="true"><g stroke="#5ad7e8" stroke-width="1.2" opacity=".55"><path d="M50 30L130 20M50 30L130 50M50 30L130 80M50 30L130 110M50 65L130 20M50 65L130 50M50 65L130 80M50 65L130 110M50 100L130 20M50 100L130 50M50 100L130 80M50 100L130 110M130 20L210 20M130 20L210 50M130 50L210 80M130 80L210 110M130 110L210 50M130 50L210 20M130 80L210 80M130 110L210 110M210 20L280 45M210 50L280 85M210 80L280 45M210 110L280 85"/></g><g fill="#0f1630" stroke="#5ad7e8" stroke-width="2.5"><circle cx="50" cy="30" r="9"/><circle cx="50" cy="65" r="9"/><circle cx="50" cy="100" r="9"/><circle cx="130" cy="20" r="9"/><circle cx="130" cy="50" r="9"/><circle cx="130" cy="80" r="9"/><circle cx="130" cy="110" r="9"/><circle cx="210" cy="20" r="9"/><circle cx="210" cy="50" r="9"/><circle cx="210" cy="80" r="9"/><circle cx="210" cy="110" r="9"/></g><g fill="#0f1630" stroke="#fbbf24" stroke-width="2.5"><circle cx="280" cy="45" r="9"/><circle cx="280" cy="85" r="9"/></g></svg>
+    <span class="n">LAB 5</span><h2>A big neural network at work</h2>
+    <p>Four networks with thousands of weights learn digit images and spirals side by side. Compare activation functions, sizes and learning rates. Draw your own digit.</p>
+    <span class="tags">ReLU · tanh · sigmoid · leaky ReLU · vanishing gradient · image data</span><span class="open">▸ Open the lab</span>
+  </a>
+</div>
+<p class="lab-story" style="margin-top:1.2rem">In every lab: choose the data, press <b>Play</b> or <b>Step</b>, change the knobs, and read <b>What to notice</b>. The same data and the same settings always give the same run, so you can repeat what you saw. "New data" makes fresh data of the same kind.</p>
+</main>
+</body>
+</html>

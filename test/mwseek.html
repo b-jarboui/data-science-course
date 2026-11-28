@@ -1,0 +1,193 @@
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Live Mean Lesson Test</title>
+<style>
+html,body{margin:0;height:100%;background:#0b1020;color:#eef2ff;font-family:"Segoe UI",Arial,sans-serif;overflow:hidden}
+#wrap{position:fixed;inset:0;display:flex;flex-direction:column}
+#view{flex:1;min-height:0;position:relative;display:grid;place-items:center}
+#c{position:relative}
+#cap{position:absolute;left:50%;bottom:3%;transform:translateX(-50%);width:min(92%,760px);text-align:center;background:rgba(15,22,48,.88);border:1px solid #26305a;border-radius:14px;padding:10px 16px;font-size:clamp(15px,3.9vw,21px)}
+#cap:empty{opacity:0}
+#ctl{display:flex;gap:10px;justify-content:center;padding:12px}
+button{font:inherit;font-weight:650;border:1px solid #26305a;background:#5ad7e8;color:#06202a;border-radius:12px;padding:8px 18px;min-height:42px}
+#seek{display:flex;align-items:center;gap:10px;padding:8px max(16px,env(safe-area-inset-left,0px)) 0}
+#bar{flex:1;accent-color:#5ad7e8;height:28px}
+#time{font:600 13px Consolas,monospace;color:#7d89b0;min-width:86px;text-align:right}
+#ctl button{min-width:72px}
+#go{min-width:90px;font-size:20px}
+</style>
+<div id="wrap"><div id="view"><div id="c"></div><div id="cap"></div></div>
+<div id="seek"><input id="bar" type="range" min="0" max="80" step="0.1" value="0" aria-label="Lesson position"><span id="time">0:00</span></div>
+<div id="ctl"><button id="back" aria-label="Back 10 seconds">⏪ 10</button><button id="go" aria-label="Play or pause">▶</button><button id="fwd" aria-label="Forward 10 seconds">10 ⏩</button></div></div>
+<script type="module">
+import * as M from 'https://cdn.jsdelivr.net/npm/manim-web@0.42.0/dist/manim-web.browser.js';
+import DATA from './data.js';
+const D = DATA['1.2.4'], S = i => D.timing[i][0], E = i => D.timing[i][1];
+const $ = id => document.getElementById(id);
+const CYAN = '#5ad7e8', AMBER = '#fbbf24', GREEN = '#86efac', VIOLET = '#a78bfa', INK = '#eef2ff', MUTED = '#7d89b0';
+
+// size: fill the view, keep 16:9 on laptop and 9:16 on phone
+const view = $('view').getBoundingClientRect();
+const P = view.height > view.width;
+let w = view.width, h = P ? w * 16 / 9 : w * 9 / 16;
+if (h > view.height) { h = view.height; w = P ? h * 9 / 16 : h * 16 / 9; }
+const sc = new M.Scene($('c'), { width: Math.round(w), height: Math.round(h), backgroundColor: '#0b1020' });
+const FW = P ? 8 : 14.22, FH = P ? 14.22 : 8;   // frame units
+if (P) { sc.camera.frameWidth = 8; sc.camera.frameHeight = 14.22; }   // phone: same 8 x 14.2 frame as the Manim phone render
+
+const audio = new Audio('n124.wav');
+const END = E(21) + 0.8;
+// Seekable timeline: the lesson code is replayed from the start; every beat before the seek target
+// runs almost instantly (catch-up), then the voice resumes at the target and beats run live again.
+let gen = 0, catchUp = 0, seekTo = 0, wantPlay = false, started = false;
+const ABORT = new Error('abort');
+function until(t) {
+  const g = gen;
+  return new Promise((res, rej) => {
+    if (g !== gen) return rej(ABORT);
+    if (t < catchUp) return res();
+    if (catchUp > 0) { catchUp = 0; audio.currentTime = seekTo; if (wantPlay) audio.play(); }
+    const f = () => { if (g !== gen) return rej(ABORT); (audio.currentTime >= t || audio.ended) ? res() : requestAnimationFrame(f); };
+    f();
+  });
+}
+function fast(a) {
+  a.duration = 0.001;
+  if (Array.isArray(a._startTimes)) { a._startTimes = a._startTimes.map(() => 0); a._endTimes = a._endTimes.map(() => 0.001); }
+  if (Array.isArray(a.animations)) a.animations.forEach(fast);
+}
+async function play(...a) {
+  const g = gen;
+  if (g !== gen) throw ABORT;
+  if (catchUp > 0) a.forEach(fast);
+  await sc.play(...a);
+  if (g !== gen) throw ABORT;
+}
+function run() { lesson().catch(e => { if (e !== ABORT) { console.error(e); $('cap').textContent = 'ERROR: ' + e.message; } }); }
+async function seek(t) {
+  t = Math.max(0, Math.min(END - 0.5, t));
+  gen++;
+  if (!audio.paused) wantPlay = true;
+  audio.pause();
+  try { sc.stop(); } catch (e) {}
+  await new Promise(r => setTimeout(r, 60));
+  sc.clear(); pillNow = null; addTitle();
+  seekTo = t; catchUp = t; audio.currentTime = t;
+  run();
+}
+const T = (text, size, color, mono) => new M.Text({ text, fontSize: size, color, fontFamily: mono ? 'Consolas' : 'Segoe UI' });
+function pillM(s, color) {
+  const t = T(s, P ? 22 : 24, color, true);
+  const wd = t.getWidth ? t.getWidth() + 0.5 : s.length * 0.2 + 0.5;
+  const r = new M.RoundedRectangle({ width: wd, height: 0.55, cornerRadius: 0.27, color, strokeWidth: 2 });
+  r.setFill('#0b1020', 0.92);
+  return new M.VGroup(r, t);
+}
+let pillNow = null;
+const PILLP = P ? [0, 2.65, 0] : [-2.6, 1.85, 0];
+function showA(s, color = CYAN) {
+  const p = pillM(s, color); p.moveTo(PILLP);
+  const a = [new M.FadeIn(p)]; if (pillNow) a.push(new M.FadeOut(pillNow));
+  pillNow = p; return a;
+}
+const show = (s, c) => play(...showA(s, c));
+// captions from the audio clock
+(function capLoop() { let i = -1; D.timing.forEach((x, n) => { if (audio.currentTime >= x[0] - 0.05) i = n; });
+  const c = i >= 0 && audio.currentTime < D.timing[i][1] + 0.35 ? D.sentences[i] : ''; if ($('cap').textContent !== c) $('cap').textContent = c; requestAnimationFrame(capLoop); })();
+
+// title
+function addTitle() {
+  const kick = pillM('1.2.4 · THE ARITHMETIC MEAN', CYAN), title = T('One fair share for a whole group', P ? 40 : 46, INK);
+  kick.moveTo([0, FH / 2 - (P ? 1.45 : 0.55), 0]); title.moveTo([0, FH / 2 - (P ? 2.25 : 1.25), 0]);
+  sc.add(kick, title);
+}
+addTitle();
+
+async function lesson() {
+  const LINE_Y = P ? 0.9 : 0.1, L = FW - (P ? 1 : 2.6), x0 = -L / 2, n2x = v => x0 + v / 40 * L;
+  // 0-1 seven students
+  // place head and body separately (group shift moved only the heads)
+  const icons = new M.VGroup(...Array.from({ length: 7 }, (_, k) => {
+    const x = (k - 3) * (P ? 0.85 : 1.1), y = LINE_Y + 0.2;
+    const head = new M.Circle({ radius: 0.14, color: INK }); head.setFill(INK, 1); head.moveTo([x, y + 0.36, 0]);
+    const body = new M.Arc({ radius: 0.26, startAngle: 0, angle: Math.PI, color: INK }); body.setFill(INK, 1); body.moveTo([x, y + 0.02, 0]);
+    return new M.VGroup(head, body);
+  }));
+  await until(S(0)); await play(new M.LaggedStart(icons.submobjects.map(i => new M.FadeIn(i)), { lagRatio: 0.12, runTime: 1.4 }), ...showA('7 STUDENTS'));
+  await until(S(1)); await show('HOW MANY MINUTES TO CLASS?', AMBER);
+  // 2-9 dots on a minutes line
+  await until(S(2));
+  const line = new M.Line({ start: [x0, LINE_Y, 0], end: [x0 + L, LINE_Y, 0], color: MUTED, strokeWidth: 3 });
+  const ticks = new M.VGroup(...[0, 10, 20, 30, 40].map(v => new M.VGroup(
+    new M.Line({ start: [n2x(v), LINE_Y - 0.07, 0], end: [n2x(v), LINE_Y + 0.07, 0], color: MUTED }),
+    T(String(v), 19, MUTED, true).moveTo([n2x(v), LINE_Y - 0.35, 0]))));
+  await play(new M.FadeOut(icons), new M.Create(line), new M.FadeIn(ticks));
+  const vals = [10, 12, 15, 18, 25, 30, 30], dots = [];
+  for (let k = 0; k < 7; k++) {
+    await until(S(3 + k));
+    const up = vals.slice(0, k).filter(v => v === vals[k]).length * 0.42;
+    const d = new M.Dot({ point: [n2x(vals[k]), LINE_Y + 0.3 + up, 0], radius: 0.13, color: CYAN });
+    const halo = new M.Dot({ point: [n2x(vals[k]), LINE_Y + 0.3 + up, 0], radius: 0.3, color: CYAN, fillOpacity: 0.18 });
+    const lab = T(String(vals[k]), P ? 15 : 19, CYAN, true).moveTo([n2x(vals[k]), LINE_Y + 0.72 + up, 0]);
+    const g = new M.VGroup(halo, d, lab); dots.push(g);
+    const extra = up ? [new M.FadeOut(dots[vals.indexOf(vals[k])].submobjects[2])] : [];
+    await play(new M.FadeIn(g), ...extra);
+  }
+  // 10-14
+  await until(S(10)); await show('SHORT ← → LONG', MUTED);
+  await until(S(11)); await show('DATA = THE ANSWERS WE COLLECTED');
+  await until(S(12)); await show('“HOW LONG IS THE TRIP?”', AMBER);
+  await until(S(13)); await play(new M.LaggedStart(dots.map(g => new M.Indicate(g, { color: AMBER })), { lagRatio: 0.15, runTime: 2 }));
+  await until(S(14)); await show('ONE NUMBER: THE FAIR SHARE?', VIOLET);
+  // 15 stacks of minute-blocks
+  await until(S(15));
+  const BW = P ? 0.7 : 0.62, PITCH = P ? 0.17 : 0.12, BASE = P ? -4.2 : -2.35, CX = P ? 0 : -2.6, SP = 1.0;
+  const colx = k => CX + (k - 3) * SP, slot = (k, j) => [colx(k), BASE + (j + 0.5) * PITCH, 0];
+  const block = p => { const b = new M.Rectangle({ width: BW, height: PITCH * 0.78, color: CYAN, strokeWidth: 1 }); b.setFill(CYAN, 0.82); return b.moveTo(p); };
+  const stacks = vals.map((v, k) => Array.from({ length: v }, (_, j) => block(slot(k, j))));
+  let labels = new M.VGroup(...vals.map((v, k) => T(String(v), 18, CYAN, true).moveTo([colx(k), BASE - 0.25, 0])));
+  const floor = new M.Line({ start: [colx(0) - 0.5, BASE, 0], end: [colx(6) + 0.5, BASE, 0], color: MUTED });
+  await play(...showA('EACH BLOCK = 1 MINUTE'), new M.FadeOut(new M.VGroup(line, ticks, ...dots)));
+  await play(new M.Create(floor), new M.FadeIn(labels),
+    new M.LaggedStart(stacks.map(st => new M.LaggedStart(st.map(b => new M.FadeIn(b)), { lagRatio: 0.08 })), { lagRatio: 0.12, runTime: 2.6 }));
+  await until(S(16)); await show('ONLY A PICTURE: NO REAL TRIP CHANGES', MUTED);
+  // 17-18 move blocks tall -> short
+  await until(S(17)); await show('MOVE BLOCKS: TALL → SHORT', AMBER);
+  const need = [[0, 10], [1, 8], [2, 5], [3, 2]], moves = [], fill = vals.slice();
+  for (const [to, n] of need) for (let i = 0; i < n; i++) {
+    const d = [6, 5, 4].find(k => stacks[k].length > 20); const b = stacks[d].pop(); stacks[to].push(b);
+    moves.push(new M.Transform(b, block(slot(to, fill[to]++)), { pathArc: -0.9 }));
+  }
+  await play(new M.LaggedStart(moves, { lagRatio: 0.35, runTime: Math.max(4, E(18) - S(17) - 1.2) }));
+  // 19 level
+  await until(S(19));
+  const ly = BASE + 20 * PITCH;
+  const level = new M.DashedLine({ start: [colx(0) - 0.5, ly, 0], end: [colx(6) + 0.5, ly, 0], color: AMBER });
+  const tag = pillM('20 EACH', AMBER); tag.moveTo([colx(3), ly + 0.45, 0]);
+  const l20 = new M.VGroup(...vals.map((v, k) => T('20', 18, AMBER, true).moveTo([colx(k), BASE - 0.25, 0])));
+  await play(new M.Create(level), new M.FadeIn(tag), new M.ReplacementTransform(labels, l20), ...showA('FAIR SHARE = 20 MINUTES', AMBER));
+  await until(S(20)); await show('MEAN  =  AVERAGE', GREEN);
+  await until(S(21)); await play(new M.Indicate(pillNow, { color: GREEN }));
+  await until(END); audio.pause(); wantPlay = false;
+}
+// controls: play/pause, back/forward 10 s, progress bar
+const bar = $('bar');
+bar.max = END.toFixed(1);
+let dragging = false;
+bar.addEventListener('input', () => { dragging = true; });
+bar.addEventListener('change', () => { dragging = false; seek(+bar.value); });
+$('go').onclick = () => {
+  if (!started) { started = true; wantPlay = true; audio.play(); run(); return; }
+  if (audio.currentTime >= END - 0.6) { wantPlay = true; seek(0); return; }
+  if (audio.paused) { wantPlay = true; if (catchUp === 0) audio.play(); } else { wantPlay = false; audio.pause(); }
+};
+$('back').onclick = () => { if (!started) return; seek(audio.currentTime - 10); };
+$('fwd').onclick = () => { if (!started) { started = true; wantPlay = true; run(); } seek(audio.currentTime + 10); };
+(function ui() {
+  if (!dragging) bar.value = audio.currentTime;
+  $('go').textContent = (audio.paused && !(wantPlay && catchUp > 0)) ? (audio.currentTime >= END - 0.6 ? '↺' : '▶') : '❚❚';
+  const s = Math.floor(audio.currentTime);
+  $('time').textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')} / ${Math.floor(END / 60)}:${String(Math.floor(END % 60)).padStart(2, '0')}`;
+  requestAnimationFrame(ui);
+})();
+window.__test = { sc, audio };
+</script>

@@ -1,0 +1,20 @@
+<!doctype html><html><head><meta charset="utf-8"><title>flow test</title>
+<style>html,body{margin:0;height:100%;background:#0b1020;overflow:hidden}#view{position:fixed;inset:0;display:grid;place-items:center}#stage{position:relative}</style></head>
+<body><div id="view"><div id="stage"></div></div><div id="cap" hidden></div>
+<input id="bar" type="range" hidden><span id="time" hidden></span><button id="play" hidden></button><button id="back" hidden></button><button id="fwd" hidden></button>
+<script type="module">
+// Test: after N.flow() and fading the network out, nothing may stay on screen.
+import { startLesson } from './engine.js?v=2';
+const D = { kicker: 'TEST', short: 'flow test', title: 'flow test', timing: [[0, 1], [1, 2], [6, 7], [7, 8]], sentences: ['a', 'b', 'c', 'd'], T: 8 };
+const lessonFn = async (L) => {
+  const { M, net, play, until, S } = L;
+  const N = net({ layers: [2, 3, 1], center: [0, -0.6, 0] });
+  await until(S(0)); await play(new M.FadeIn(N.group));
+  if (!location.search.includes('noflow')) { await play(...N.flow(0)); await play(...N.flow(1)); }
+  await until(S(2)); await play(new M.FadeOut(N.group));
+};
+const $ = x => document.getElementById(x);
+const ctl = await startLesson({ D, lessonFn, mount: $('stage'), audioUrl: '../audio/1.1.1.mp3',
+  els: { cap: $('cap'), bar: $('bar'), time: $('time'), play: $('play'), back: $('back'), fwd: $('fwd') } });
+window.__ctl = ctl;
+</script></body></html>

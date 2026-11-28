@@ -1,0 +1,44 @@
+<!doctype html><html><head><meta charset="utf-8"><title>record</title>
+<style>html,body{margin:0;height:100%;background:#0b1020;overflow:hidden}#view{position:fixed;inset:0;display:grid;place-items:center}#stage{position:relative}</style></head>
+<body><div id="view"><div id="stage"></div></div><div id="cap" hidden></div>
+<input id="bar" type="range" hidden><span id="time" hidden></span><button id="play" hidden></button><button id="back" hidden></button><button id="fwd" hidden></button>
+<script type="module">
+// Frame-exact recorder: drives the lesson with a fake audio clock (no real playback), captures every frame as JPEG
+// and posts it to serve.py (/__save -> lessons/<id>/rec/). record.py then joins the frames with the narration mp3.
+const q = new URLSearchParams(location.search), id = q.get('s'), fps = +(q.get('fps') || 25), tag = q.get('tag') || 'L';
+const errors = [];
+addEventListener('error', e => errors.push(String(e.message)));
+addEventListener('unhandledrejection', e => errors.push(String(e.reason && e.reason.message || e.reason)));
+const save = async (name, body, type) => {   // retry: the local server sometimes drops a request when busy
+  for (let k = 0; k < 8; k++) {
+    try { const r = await fetch(`/__save?f=lessons/${id}/rec_${tag}/${name}`, { method: 'POST', headers: { 'Content-Type': type }, body }); if (r.ok) return r; } catch (e) {}
+    await new Promise(r => setTimeout(r, 500 * (k + 1)));
+  }
+  throw new Error('save failed after retries: ' + name);
+};
+const tick = () => new Promise(r => setTimeout(r, 0));
+try {
+  const DATA = (await import(`../data.js?v=${Date.now()}`)).default, D = DATA[id];
+  const { startLesson } = await import('./engine.js');
+  const lessonFn = (await import(`./${id}.js?v=${Date.now()}`)).default;
+  const $ = x => document.getElementById(x);
+  const ctl = await startLesson({ D, lessonFn, mount: $('stage'), audioUrl: `../audio/${id}.mp3`,
+    els: { cap: $('cap'), bar: $('bar'), time: $('time'), play: $('play'), back: $('back'), fwd: $('fwd') } });
+  const a = ctl.audio; a.pause(); a.muted = true;
+  let T = 0;
+  Object.defineProperty(a, 'currentTime', { get: () => T, set: v => { T = v; }, configurable: true });
+  Object.defineProperty(a, 'duration', { get: () => D.T, configurable: true });
+  Object.defineProperty(a, 'seeking', { get: () => false, configurable: true });
+  ctl.seek(0);                                   // start the lesson run on our clock
+  const total = Math.ceil((D.T + 0.6) * fps);
+  for (let k = 0; k < total; k++) {
+    T = Math.min(k / fps, D.T);
+    for (let j = 0; j < 3; j++) { a.dispatchEvent(new Event('timeupdate')); await tick(); }
+    ctl.sc.render();
+    const blob = await new Promise(r => ctl.sc.getCanvas().toBlob(r, 'image/png'));
+    await save(`f${String(k).padStart(5, '0')}.png`, blob, 'image/png');
+  }
+} catch (e) { errors.push('FATAL ' + (e && e.stack || e)); }
+await save(`errors.json`, JSON.stringify(errors), 'application/json');
+await save(`DONE`, 'done', 'text/plain');
+</script></body></html>

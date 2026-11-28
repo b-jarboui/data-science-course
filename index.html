@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<script>
+/* Anonymous usage statistics (Microsoft Clarity). Skipped for QA (?qa=1) and local development. */
+(function(c,l,a,r,i,t,y){
+  if(/[?&]qa=1/.test(location.search)||/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)||location.protocol==="file:")return;
+  c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+  t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+  y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+})(window,document,"clarity","script","zkb6a2xrzl");
+</script>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data Science · From Descriptive Statistics to AI</title>
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #0b1020;
+  --ink: #eef2ff;
+  --muted: #b2bdd9;
+  --cyan: #5ad7e8;
+  --line: #344264;
+  --card: #10172d;
+  --mono: Consolas, "Courier New", monospace;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+  background-color: var(--bg);
+  background-image: linear-gradient(#202b442e 1px, transparent 1px),
+    linear-gradient(90deg, #202b442e 1px, transparent 1px);
+  background-size: 40px 40px;
+  font: 1rem/1.5 "Segoe UI", Inter, Arial, sans-serif;
+}
+main { width: min(100%, 64rem); margin: auto; padding: clamp(1rem, 3vw, 2.5rem) clamp(.875rem, 3vw, 2rem) 4rem; }
+header { margin-bottom: 1.5rem; }
+.kick, .stats, .un, .uc, .id, .play { font: 600 .875rem/1.4 var(--mono); }
+.kick { display: flex; align-items: center; gap: .75rem; color: var(--cyan); letter-spacing: .09em; }
+.kick::before { content: ""; width: 1.75rem; height: 2px; background: currentColor; }
+h1 {
+  max-width: 32ch;
+  margin: .75rem 0;
+  font-size: clamp(1.85rem, 3.8vw, 3rem);
+  line-height: 1.08;
+  letter-spacing: -.025em;
+  text-wrap: balance;
+}
+.sub { max-width: 67ch; margin: 0; color: var(--muted); text-wrap: pretty; }
+.stats { color: var(--cyan); margin: .85rem 0 0; }
+.unit { margin: 0 0 .85rem; border: 1px solid var(--line); border-radius: 1rem; background: var(--card); }
+.unit > summary {
+  cursor: pointer;
+  list-style: none;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  grid-template-areas: "unit title count toggle";
+  align-items: center;
+  gap: .4rem .85rem;
+  padding: 1rem clamp(.875rem, 2vw, 1.375rem);
+  border-radius: inherit;
+}
+summary::-webkit-details-marker { display: none; }
+summary::after {
+  content: "";
+  grid-area: toggle;
+  width: .45rem; height: .45rem;
+  border: solid var(--cyan); border-width: 0 2px 2px 0;
+  transform: rotate(-45deg);
+  justify-self: center;
+}
+.unit[open] > summary { border-bottom: 1px solid var(--line); border-radius: 1rem 1rem 0 0; }
+.unit[open] > summary::after { transform: rotate(45deg); }
+.un { grid-area: unit; color: var(--cyan); white-space: nowrap; }
+.ut { grid-area: title; font-size: 1.3rem; font-weight: 700; line-height: 1.25; }
+.uc { grid-area: count; color: var(--muted); }
+.chap { padding: 1.2rem clamp(.65rem, 2vw, 1.375rem); }
+.chap + .chap { border-top: 1px solid var(--line); }
+.ch {
+  display: flex; align-items: baseline; gap: .55rem;
+  margin: 0 0 .65rem; font-size: 1.125rem; line-height: 1.4;
+}
+.ch > span { color: var(--cyan); font: 600 .875rem var(--mono); }
+.l {
+  display: grid;
+  grid-template-columns: 3.75rem minmax(0, 1fr) auto;
+  grid-template-areas: "id copy play";
+  align-items: start;
+  gap: .3rem 1rem;
+  padding: .7rem .9rem;
+  color: var(--ink);
+  text-decoration: none;
+  border: 1px solid transparent;
+  border-radius: .7rem;
+}
+.l + .l { margin-top: .35rem; }
+a.l { background: #151f3a; border-color: #435372; }
+div.l { color: var(--muted); }
+.id { grid-area: id; color: var(--cyan); }
+div.l .id { color: var(--muted); }
+.copy { grid-area: copy; overflow-wrap: anywhere; }
+.lt { font-size: 1.0625rem; font-weight: 650; line-height: 1.35; display: block; }
+.g { display: block; margin-top: .15rem; color: var(--muted); font-size: 1rem; }
+.play { grid-area: play; justify-self: end; align-self: center; padding: .18em .6em; color: var(--cyan); background: #192d41; border: 1px solid #375a70; border-radius: .45rem; white-space: nowrap; }
+a.l:hover, summary:hover { background: #1a2643; }
+a.l:hover { border-color: var(--cyan); }
+:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
+@media (min-width: 48rem) {
+  header { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 1.5rem; align-items: end; }
+  header > :not(.stats) { grid-column: 1; }
+  .stats { grid-column: 2; grid-row: 3; }
+}
+@media (max-width: 37rem) {
+  header { margin-bottom: 1rem; }
+  .chap { padding: .875rem .625rem; }
+  .ch { gap: .4rem; }
+  .unit > summary { padding-block: .75rem; }
+  .ut { font-size: 1.15rem; }
+  .l { align-items: center; gap: .25rem .5rem; }
+  .unit > summary { grid-template-columns: minmax(0, 1fr) auto auto; grid-template-areas: "unit count toggle" "title title title"; }
+  .l { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "id play" "copy copy"; padding: .625rem .75rem; }
+  .g { line-height: 1.4; }
+}
+</style>
+</head>
+<body>
+<main>
+<header>
+<span class="kick">DATA SCIENCE · VOICELEARN</span>
+<h1>From descriptive statistics to artificial intelligence</h1>
+<p class="sub">Narrated lessons for everyone, no background needed. Each idea is shown step by step, in time with the voice, before any formula.</p>
+<p class="sub" style="margin-top:.6rem"><a href="lab/index.html" style="color:var(--cyan);font-weight:650">▸ Algorithms in action: the lab</a> · watch the methods of the course work on hundreds of points and compare them.</p>
+<p class="stats" id="stats"></p>
+</header>
+<div id="map"></div>
+</main>
+<script type="module">
+import DATA from './data.js';
+import COURSE from './course.js';
+const built = new Set(Object.keys(DATA));
+let total = 0;
+document.getElementById('map').innerHTML = COURSE.map(u => {
+  const ls = u.chapters.flatMap(c => c.lessons); total += ls.length;
+  const nb = ls.filter(l => built.has(l.id)).length;
+  return `<details class="unit"${nb ? ' open' : ''}><summary><span class="un">UNIT ${u.n}</span><span class="ut">${u.title}</span><span class="uc">${nb}/${ls.length} ready</span></summary>` +
+    u.chapters.map(c => `<div class="chap"><h2 class="ch"><span>${c.n}</span>${c.title}</h2>` +
+      c.lessons.map(l => built.has(l.id)
+        ? `<a class="l" href="player.html?s=${l.id}"><span class="id">${l.id}</span><span class="copy"><span class="lt">${DATA[l.id].title}</span><span class="g">${l.goal}</span></span><span class="play">▸ Play</span></a>`
+        : `<div class="l"><span class="id">${l.id}</span><span class="copy"><span class="lt">${l.title}</span><span class="g">${l.goal}</span></span></div>`).join('') + `</div>`).join('') +
+    `</details>`;
+}).join('');
+document.getElementById('stats').textContent = `${built.size} of ${total} lessons ready`;
+</script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+<!doctype html>
+<!-- Test helper only (not linked): shows a lab page in a frame of phone width. _frame.html?w=375&h=812&u=clustering.html%3Fautotest%3D1 -->
+<html><body style="margin:0;background:#000">
+<script>
+const q = new URLSearchParams(location.search), f = document.createElement('iframe');
+f.src = q.get('u'); f.style.cssText = `width:${q.get('w') || 375}px;height:${q.get('h') || 812}px;border:0;display:block`;
+document.body.append(f);
+const pre = document.createElement('pre'); pre.id = 'autotest'; document.body.append(pre);
+onmessage = e => { if (e.data && e.data.autotest) pre.textContent = e.data.autotest; };
+</script>
+</body></html>
